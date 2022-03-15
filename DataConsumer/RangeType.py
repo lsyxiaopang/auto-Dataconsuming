@@ -14,7 +14,7 @@ class RangeNumber:
 
         注意，当uperr<0或downerr>0均会发生一个ValueError
         '''
-        self._mainnumber=mainnumber
+        self._mainnumber=float(mainnumber)
         if uperr<0:
             raise ValueError("uperr should not less than zero!")
         else:
@@ -57,7 +57,7 @@ class RangeNumber:
 
     def __getfloatlen(s:float):
         abss=abs(s)
-        log=int(math.log10(abss))
+        log=int(math.log10(abss)+1e-10)
         if log<=0 and math.log10(abss)<0:
             log-=1
         return log
@@ -107,8 +107,24 @@ class RangeNumber:
         r=math.sqrt((other._uperr/other._mainnumber)**2+\
                     (self._uperr/self._mainnumber)**2)*data
         return RangeNumber(data,r,l)
-
+    def __pow__(self,other):
+        if isinstance(other,float):
+            other=RangeNumber(other)
+        downerr1=float(other)*float(self)**(float(other)-1)*self._downerr
+        uperr1=float(other)*float(self)**(float(other)-1)*self._uperr
+        downerr2=math.log(self)*(float(self)**float(other))*self._downerr
+        uperr2=math.log(self)*(float(self)**float(other))*self._uperr
+        downerr=-math.sqrt(downerr1**2+downerr2**2)
+        uperr=math.sqrt(uperr1**2+uperr2**2)
+        m=float(self)**float(other)
+        return RangeNumber(m,uperr,downerr)
     #以下是用于RangeNumber的math库中某些函数实现
+    def log(x,base=math.e):
+        '''该函数可以实现取对数的运算(默认以e为底)'''
+        p=1/(float(x)*math.log(base))
+        m=math.log(x,base)
+        return RangeNumber(m,x._uperr*p,x._downerr*p)
+
     
     def fromlist(floatlist:float,uperr:float=0,downerr:float=0):
         '''从浮点数列表直接获得RangeNumber的列表'''
@@ -140,7 +156,6 @@ class RangeFromList(RangeNumber):
 
 
 if __name__=="__main__":
-    print(RangeFromList(RangeNumber.fromlist(
-        [2.014,2.02,2.016,2.02,2.018,2.018,2.020,2.022,2.016,2.02]
-        ,0.02/math.sqrt(3))))
+    print(RangeNumber.log(RangeNumber(10,0.1)**RangeNumber(2.2,0.01)))
+
 
