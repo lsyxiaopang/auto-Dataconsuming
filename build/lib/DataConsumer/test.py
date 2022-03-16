@@ -17,8 +17,8 @@ def __confloat(s:float,err:float):
         cds=s/(10**ls)
         print(allwstr%cds+"\\times 10^{{ {} }}".format(ls))
 
-
-print(RangeNumber(10,0.01,-0.2))
-print(int(0.9))
+a=RangeNumber(39,0.2,-0.1)
+print(a)
+print(a**2.0)
 print(math.log10(0.9))
 print(int(-0.04))

@@ -14,12 +14,12 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'DataConsumer'
-DESCRIPTION = '实现对数据的快速处理'
+DESCRIPTION = '实现对数据的快速处理以及对带有不确定度的数据的运算和修约'
 URL = 'https://github.com/lsyxiaopang/auto-Dataconsuming'
 EMAIL = 'lisongyuandy@foxmail.com'
 AUTHOR = 'Lisongyu'
 REQUIRES_PYTHON = '>=3.0.0'
-VERSION = '0.0.5'
+VERSION = '0.0.6'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -30,7 +30,7 @@ REQUIRED = [
 # What packages are optional?
 EXTRAS = {
     # 'fancy feature': ['django'],
-    '使用DataType类型需要依赖':['pandas','numpy']
+    'packages needed for DataType':['pandas','numpy']
 }
 
 # The rest you shouldn't have to touch too much :)
