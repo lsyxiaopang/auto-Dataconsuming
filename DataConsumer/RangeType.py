@@ -110,10 +110,10 @@ class RangeNumber:
     def __pow__(self,other):
         if isinstance(other,float):
             other=RangeNumber(other)
-        downerr1=float(other)*float(self)**(float(other)-1)*self._downerr
-        uperr1=float(other)*float(self)**(float(other)-1)*self._uperr
-        downerr2=math.log(self)*(float(self)**float(other))*self._downerr
-        uperr2=math.log(self)*(float(self)**float(other))*self._uperr
+        downerr1=float(other)*(float(self)**(float(other)-1))*self._downerr
+        uperr1=float(other)*(float(self)**(float(other)-1))*self._uperr
+        downerr2=math.log(self)*(float(self)**float(other))*other._downerr
+        uperr2=math.log(self)*(float(self)**float(other))*other._uperr
         downerr=-math.sqrt(downerr1**2+downerr2**2)
         uperr=math.sqrt(uperr1**2+uperr2**2)
         m=float(self)**float(other)
@@ -156,6 +156,6 @@ class RangeFromList(RangeNumber):
 
 
 if __name__=="__main__":
-    print(RangeNumber.log(RangeNumber(10,0.1)**RangeNumber(2.2,0.01)))
+    print(RangeNumber(10,0.1)**RangeNumber(2.2,0.01))
 
 
