@@ -1,2 +1,2 @@
-from DataType import *
-from RangeType import *
+from DataConsumer.DataType import *
+from DataConsumer.RangeType import *

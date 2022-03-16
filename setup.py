@@ -19,7 +19,7 @@ URL = 'https://github.com/lsyxiaopang/auto-Dataconsuming'
 EMAIL = 'lisongyuandy@foxmail.com'
 AUTHOR = 'Lisongyu'
 REQUIRES_PYTHON = '>=3.0.0'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: DataConsumer
-Version: 0.0.6
+Version: 0.0.7
 Summary: 实现对数据的快速处理以及对带有不确定度的数据的运算和修约
 Home-page: https://github.com/lsyxiaopang/auto-Dataconsuming
 Author: Lisongyu
@@ -19,7 +19,7 @@ Provides-Extra: packages needed for DataType
 License-File: LICENSE
 
 
-# auto-Dataconsuming(0.0.4)
+# auto-Dataconsuming(0.0.7)
 ## 1.介绍
 这个库分为两个部分RangeType和DataType
 ### 1.1 RangeType
