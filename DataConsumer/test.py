@@ -1,4 +1,8 @@
 import math
+try:
+    import xadsad
+except:
+    print("err")
 from RangeType import *
 def __getfloatlen(s:float):
     abss=abs(s)

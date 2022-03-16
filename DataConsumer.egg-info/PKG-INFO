@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: DataConsumer
-Version: 0.0.7
+Version: 0.0.9
 Summary: 实现对数据的快速处理以及对带有不确定度的数据的运算和修约
 Home-page: https://github.com/lsyxiaopang/auto-Dataconsuming
 Author: Lisongyu
@@ -37,14 +37,12 @@ License-File: LICENSE
 
 在安装完成后,使用
 
-`from DataConsumer.DataType import *`
+`from DataConsumer import *`
 
 导入所需的类型(已经包含了RangeType和DataType)
 
 -----
-如果不希望安装numpy等依赖,可以只使用RangeType部分,此时,需要使用
-
-`from DataConsumer.RangeType import *`
+如果不希望安装numpy等依赖,可以只使用RangeType部分,此时,在导入时会有警告信息
 ## 3.使用
 ### 3.1 RangeType
 #### 3.1.1 RangeNumber类

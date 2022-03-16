@@ -1,4 +1,4 @@
-# auto-Dataconsuming(0.0.7)
+# auto-Dataconsuming(0.0.9)
 ## 1.介绍
 这个库分为两个部分RangeType和DataType
 ### 1.1 RangeType
@@ -21,9 +21,7 @@
 导入所需的类型(已经包含了RangeType和DataType)
 
 -----
-如果不希望安装numpy等依赖,可以只使用RangeType部分,此时,需要使用
-
-`from DataConsumer.RangeType import *`
+如果不希望安装numpy等依赖,可以只使用RangeType部分,此时,在导入时会有警告信息
 ## 3.使用
 ### 3.1 RangeType
 #### 3.1.1 RangeNumber类
