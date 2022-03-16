@@ -1,4 +1,4 @@
-# auto-Dataconsuming(0.0.4)
+# auto-Dataconsuming(0.0.6)
 ## 1.介绍
 这个库分为两个部分RangeType和DataType
 ### 1.1 RangeType
