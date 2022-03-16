@@ -23,13 +23,14 @@ VERSION = '0.0.5'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'typing','pandas','numpy',
+    'typing',
     # 'requests', 'maya', 'records',
 ]
 
 # What packages are optional?
 EXTRAS = {
     # 'fancy feature': ['django'],
+    '使用DataType类型需要依赖':['pandas','numpy']
 }
 
 # The rest you shouldn't have to touch too much :)
