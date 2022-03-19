@@ -1,6 +1,7 @@
+'''注意,现有方法中对于当两侧误差不对称同时函数导数为负时可能会出错,有待修改!'''
+
 from typing import Tuple,List
 import math
-
 class RangeNumber:
     '''RangeNumber类用来保存一个带有误差信息的数据，支持四则运算，并且可以转换其格式'''
     def __init__(self,mainnumber:float,uperr:float=0,downerr:float=0) -> None:
@@ -22,7 +23,7 @@ class RangeNumber:
         if downerr>0:
             raise ValueError("downerr should not more than zero!")
         elif downerr==0:
-            self._downerr=uperr
+            self._downerr=-uperr
         else:
             self._downerr=downerr
     @property
@@ -155,7 +156,21 @@ class RangeFromList(RangeNumber):
         (lsum+RangeNumber(0,gerr)).wholedata
 
 
-if __name__=="__main__":
-    print(RangeNumber(10,0.1)**RangeNumber(2.2,0.01))
+class TestRangeType:
+    tester_num=[(12,0.1,-0.1),(534,10,-5),(0.02,0.003,-0.005)]
+    def test_range_operation(self):
+        '''
+        测试运算符的工作
+
+        等号右边来自mma输出
+        '''
+        o=[]
+        for k in TestRangeType.tester_num:
+            o.append(RangeNumber(k[0],k[1],k[2]))
+        assert str(o[0]*o[1])==str(RangeNumber(6408,131,-80))#正常#乘法测试
+        assert str(RangeNumber.log(o[1]))==str(RangeNumber(6.280,0.019,-0.009))#正常#对数测试
+        assert str(o[0]**0.5)==str(RangeNumber(3.464,0.014))#正常#乘方测试
+
+        
 
 
