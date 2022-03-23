@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: DataConsumer
-Version: 0.0.9
+Version: 0.0.10
 Summary: 实现对数据的快速处理以及对带有不确定度的数据的运算和修约
 Home-page: https://github.com/lsyxiaopang/auto-Dataconsuming
 Author: Lisongyu
@@ -19,7 +19,7 @@ Provides-Extra: packages needed for DataType
 License-File: LICENSE
 
 
-# auto-Dataconsuming(0.0.7)
+# auto-Dataconsuming(0.0.9)
 ## 1.介绍
 这个库分为两个部分RangeType和DataType
 ### 1.1 RangeType
@@ -132,6 +132,8 @@ tabular_format方法可以将一个数据信息形成一个表头格式的Latex�
 
 ##### 3.2.2.2支持操作
 该类型的字符串转换方法可以输出一个Markdown风格的表格
+
+可以对函数进行拟合与画图,见get_fitted和draw_fitted
 
 ##### 3.2.2.3实例
 该实例使用的为3.13瑞利盘测量细线扭力系数的数据
