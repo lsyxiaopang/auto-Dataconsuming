@@ -1,25 +1,38 @@
-from typing import Iterable, OrderedDict
+from typing import Iterable, OrderedDict,Tuple
 
-from pandas import array
+#?from pandas import array
 from DataConsumer.RangeType import *
+import math
 import numpy as np
 import collections as c
+import matplotlib.pyplot as plt
 class DataConfig:
-    '''
-    该类型用于储存数据的相关参数,
-    目前仅含有对于单位和名称(及其缩写)的储存
-    '''
+    """用于储存数据信息
+    """    
     def __init__(self,fullname:str,shortname:str=None,unit:str=None) -> None:
-        '''初始化函数,保存相关信息'''
+        """__init__ 初始化一个DataConfig
+
+        Parameters
+        ----------
+        fullname : str
+            一个数据的全名
+        shortname : str, optional
+            一个数据名称的缩写, by default None
+        unit : str, optional
+            单位, by default None
+        """               
         self.fullname=fullname
         self.shortname=shortname
         self.unit=unit
 
-    def tabular_format(self):
-        '''
-        该方法按照fullname$shortname$($\mathbf{unit}$)的方式进行格式化,
-        可以作为表头
-        '''
+    def tabular_format(self)->str:
+        """tabular_format 用于将其格式化为一个表头格式
+
+        Returns
+        -------
+        str
+            一个表头格式的字符串
+        """              
         retstrlist=[]
         if self.fullname:
             retstrlist.append(self.fullname)
@@ -28,17 +41,32 @@ class DataConfig:
         if self.unit:
             retstrlist.append("($\mathbf{"+self.unit+"}$)")
         return "".join(retstrlist)
+    def mat_format(self)->str:
+        """mat_format 格式化为绘图所用格式
+
+        Returns
+        -------
+        str
+            绘图所用格式的字符串
+        """        
+        #*目前与表头格式字符串实现相同
+        return self.tabular_format()
         
 class DataConsumer:
-    '''
-    一个储存并且将数据按照指定方式进行处理的库
-    '''
+    """一个处理字符串的类型
+    """    
     def __init__(self,inpdict:dict,func,confdict:dict) -> None:
-        '''inpdict:输入数据的字典(使用快速指标)
-            func:对于数据中的每一组元素进行处理的函数,接受**argv,
-            并且输出一个有序数组collections
-            confdict:一个用于指示快速指标和内容关系的字典
-        '''
+        """__init__ 初始化函数
+
+        Parameters
+        ----------
+        inpdict : dict
+            输入数据的字典(缩写指标)
+        func : _type_
+            一个数据处理用的函数
+        confdict : dict
+            保存数据信息的字典
+        """              
         self._indict=inpdict
         self._confdict=confdict
         (self._inkeylist,self._inty,self._inarray)=\
@@ -59,7 +87,13 @@ class DataConsumer:
         
     
     def __str__(self) -> str:
-        '''将输出一个md风格的表格'''
+        """__str__ 返回md格式表格
+
+        Returns
+        -------
+        str
+            一个包含md格式表格的字符串
+        """               
         tablist=[self._confdict[key].tabular_format() for key in self._outkeylist]
         titlestr="|"+"|".join(tablist)+"|\n"
         setstr="|----"*len(self._outkeylist)+"|\n"
@@ -81,7 +115,56 @@ class DataConsumer:
             wl.append(tuple(l))
         array=np.array(wl,dtype=ty)
         return (lis,ty,array)
+    def get_fitted(self,xdataname:str,ydataname:str)->Tuple[np.array,float]:       
+        """get_fitted 获得拟合的多项式
 
+        Parameters
+        ----------
+        xdataname : str
+            x数据简称
+        ydataname : str
+            y数据简称
+
+        Returns
+        -------
+        np.array
+            拟合后的多项式
+        float
+            RSquared
+        """        
+        xdata=np.array(self._outdict[xdataname],dtype=float)
+        ydata=np.array(self._outdict[ydataname],dtype=float)
+        poly=np.polyfit(xdata,ydata,1)
+        #*求SSR
+        pydata=np.polyval(poly,xdata)
+        SSR=np.sum((ydata-pydata)**2)
+        #*求SST
+        avey=np.mean(ydata)
+        SST=np.sum((ydata-avey)**2)
+        RS=1-SSR/SST
+        return poly,RS
+    def draw_fitted(self,xdataname:str,ydataname:str
+                    ,fig:plt.subplot,**kwargs)->None:
+        """draw_fitted 绘制拟合后的图像
+
+        Parameters
+        ----------
+        xdataname : str
+            x数据简称
+        ydataname : str
+            y数据简称
+        fig : plt.subplot
+            用于绘图的子图
+        """        
+        poly,RSquared=self.get_fitted(xdataname,ydataname)
+        xplot=np.linspace(min(self._outdict[xdataname])
+                        ,max(self._outdict[xdataname]),20)
+        yplot=np.polyval(poly,xplot)
+        fig.plot(xplot,yplot,**kwargs)
+        fig.set_xlabel(self._confdict[xdataname].mat_format())
+        fig.set_ylabel(self._confdict[ydataname].mat_format())
+        fig.set_title("$R^2=%0.4f$"%RSquared)
+        
 
 if __name__=="__main__":
     pass

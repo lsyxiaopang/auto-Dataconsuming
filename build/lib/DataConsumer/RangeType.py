@@ -2,18 +2,37 @@ from typing import Tuple,List
 import math
 
 class RangeNumber:
-    '''RangeNumber类用来保存一个带有误差信息的数据，支持四则运算，并且可以转换其格式'''
+    """ 带有不确定度的数字
+
+        支持四则运算，并且可以转换其格式'
+    """
     def __init__(self,mainnumber:float,uperr:float=0,downerr:float=0) -> None:
-        '''初始化一个RangeNumber，初始化示例如下：
+        """__init__ 用最基本的方法初始化一个有不确定度的数字
 
-        RangeNumber(10.0)#创建一个没有误差的数字（误差为0）
+        Parameters
+        ----------
+        mainnumber : float
+            数值
+        uperr : float, optional
+            上误差 by default 0
+        downerr : float, optional
+            下误差 by default 0注意,当其取默认值时为-uperr
 
-        RangeNumber(10.0,0.1)#代表数字(10+-0.1)
+        Raises
+        ------
+        ValueError
+            上误差应当大于等于0
+        ValueError
+            下误差应当小于等于0
 
-        RangeNumber(10.0,0.2,-0.1)#代表数字（10+0.2-0.1）
+        Examples
+        ------
+        >>RangeNumber(10.0)#创建一个没有误差的数字（误差为0）
 
-        注意，当uperr<0或downerr>0均会发生一个ValueError
-        '''
+        >>RangeNumber(10.0,0.1)#代表数字(10+-0.1)
+
+        >>RangeNumber(10.0,0.2,-0.1)#代表数字（10+0.2-0.1）
+        """
         self._mainnumber=float(mainnumber)
         if uperr<0:
             raise ValueError("uperr should not less than zero!")
@@ -27,16 +46,34 @@ class RangeNumber:
             self._downerr=downerr
     @property
     def mainnum(self)->float:
-        '''返回miannumber'''
+        """mainnum 属性,返回值
+
+        Returns
+        -------
+        float
+            值
+        """
         return self._mainnumber
     @property
     def wholedata(self)->Tuple[float,float,float]:
-        '''返回完整的数据，以(downerr,mainnumber,uperr)的方式组织'''
+        """wholedata 得到全体数据
+
+        Returns
+        -------
+        Tuple[float,float,float]
+            返回完整的数据，以(downerr,mainnumber,uperr)的方式组织
+        """        ''''''
         return (self._downerr,self._mainnumber,self._uperr)
 
     @property
     def mmatype(self)->str:
-        '''返回一个mma风格的字符串'''
+        """mmatype mma风格
+
+        Returns
+        -------
+        str
+            返回一个mma风格的字符串
+        """  
         if abs(self._downerr)<abs(self._mainnumber)/100000 \
         and abs(self._uperr)<abs(self._mainnumber)/100000 :#忽略误差
             return str(self._mainnumber)
@@ -45,9 +82,15 @@ class RangeNumber:
                     +","+str(self._uperr)+"]"
 
     def __str__(self) -> str:
-        '''返回一个LaTex风格的字符串（在此时，mainnumber已经使用约化）
-        当log10(mainnumber)>4，或max(|uperr|,|downerr|)>1则使用科学计数法表示
-        '''
+        """__str__ 返回一个LaTex风格的字符串（在此时，mainnumber已经使用约化）
+
+        Returns
+        -------
+        str
+            返回一个LaTex风格的字符串（在此时，mainnumber已经使用约化）  
+            当log10(mainnumber)>4，或max(|uperr|,|downerr|)>1则使用科学计数法表示
+        """ 
+        #todo 现有的数据修约可能存在问题,需要修改
         errnumu="%.1g"%self._uperr
         errnumd="%.1g"%self._downerr
         retstr="$("+\
@@ -119,21 +162,57 @@ class RangeNumber:
         m=float(self)**float(other)
         return RangeNumber(m,uperr,downerr)
     #以下是用于RangeNumber的math库中某些函数实现
-    def log(x,base=math.e):
-        '''该函数可以实现取对数的运算(默认以e为底)'''
+    def log(x,base:float=math.e):
+        """log 实现取对数的运算
+            静态方法
+        Parameters
+        ----------
+        x : RangeNumber
+            求对数的数
+        base : float, optional
+            底数, 默认为自然对数
+
+        Returns
+        -------
+        RangeNumber
+            返回求对数后带有误差的值
+        """  
         p=1/(float(x)*math.log(base))
         m=math.log(x,base)
         return RangeNumber(m,x._uperr*p,x._downerr*p)
 
     
     def fromlist(floatlist:float,uperr:float=0,downerr:float=0):
-        '''从浮点数列表直接获得RangeNumber的列表'''
+        """fromlist 对于相同误差快速初始化
+
+        Parameters
+        ----------
+        floatlist : float
+            输入的浮点数列表
+        uperr : float, optional
+            上误差, by default 0
+        downerr : float, optional
+            下误差, by default 0(同RangeNumber初始化)
+
+        Returns
+        -------
+        List[RangeNumber]
+            从浮点数列表直接获得的RangeNumber的列表
+        """        
         return [RangeNumber(k,uperr,downerr) for k in floatlist]
 
 
 class RangeFromList(RangeNumber):
-    '''采用从列表加入的方式获取多次测量所得平均以及相关误差'''
+    """RangeFromList 采用从列表加入的方式获取多次测量所得平均以及相关误差
+    """   
     def __init__(self,datalist:list) -> None:
+        """__init__ 用于初始化
+
+        Parameters
+        ----------
+        datalist : List[RangeNumber]
+            RangeNumber列表(有相同误差范围),作为多次测量结果
+        """        
         rlist=[]
         mdl=[]
         for d in datalist:
