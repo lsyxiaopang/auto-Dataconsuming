@@ -1,28 +1,17 @@
-import math
-try:
-    import xadsad
-except:
-    print("err")
-from RangeType import *
-def __getfloatlen(s:float):
-    abss=abs(s)
-    log=int(math.log10(abss))
-    if log<=0 and math.log10(abss)<0:
-        log-=1
-    return log
+from DataType import *
+plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题
+tlist=[28.58,30,32.65,35.04,37.55,39.50,42.82,45.00,47.50,50.00]
+rlist=[8934,8631,7986,7379,6845,6410,5713,5347,4972,4570]
+inpd={"T":tlist,"R":rlist}
+def cfunc(T,R):
+    t=1/T
+    lnr=math.log(R)
+    return {"t":t,"lnr":lnr}
+confdict={"t":DataConfig("温度倒数",r"\frac{1}{T}"),"lnr":DataConfig("电阻对数","\\ln r")}
+k=DataConsumer(inpd,cfunc,confdict)
+aw=plt.figure()
 
-def __confloat(s:float,err:float):
-    ls=__getfloatlen(s)
-    lerr=__getfloatlen(err)
-    allwstr="%.{}g".format(ls-lerr+1)
-    if abs(ls)<4:
-        print(allwstr%s)
-    else:
-        cds=s/(10**ls)
-        print(allwstr%cds+"\\times 10^{{ {} }}".format(ls))
-
-a=RangeNumber(39,0.2,-0.1)
-print(a)
-print(a**2.0)
-print(math.log10(0.9))
-print(int(-0.04))
+a=aw.add_subplot(111)
+k.draw_fitted("t","lnr",a)
+plt.show()

@@ -41,9 +41,10 @@ class RangeNumber:
         if downerr>0:
             raise ValueError("downerr should not more than zero!")
         elif downerr==0:
-            self._downerr=uperr
+            self._downerr=-uperr
         else:
             self._downerr=downerr
+        self.show_err=False#*判断是否显示误差值
     @property
     def mainnum(self)->float:
         """mainnum 属性,返回值
@@ -78,8 +79,8 @@ class RangeNumber:
         and abs(self._uperr)<abs(self._mainnumber)/100000 :#忽略误差
             return str(self._mainnumber)
         else:
-            return "Range["+str(self._mainnumber)+","+str(self._downerr)\
-                    +","+str(self._uperr)+"]"
+            return "Around["+str(self._mainnumber)+",{"+str(self._downerr)\
+                    +","+str(self._uperr)+"}]"
 
     def __str__(self) -> str:
         """__str__ 返回一个LaTex风格的字符串（在此时，mainnumber已经使用约化）
@@ -93,14 +94,20 @@ class RangeNumber:
         #todo 现有的数据修约可能存在问题,需要修改
         errnumu="%.1g"%self._uperr
         errnumd="%.1g"%self._downerr
-        retstr="$("+\
-                RangeNumber.__confloat(self._mainnumber,max(-self._downerr,self._uperr))\
+        if self.show_err:#*显示是否展示误差大小
+            retstr="$("+\
+                    RangeNumber.__confloat(self._mainnumber,max(-self._downerr,self._uperr))\
                     +")"+"^{"+str(errnumu)+"}_{"+str(errnumd)+"}$"
+        else:
+            retstr="$"+RangeNumber.__confloat(self._mainnumber,max(-self._downerr,self._uperr))+"$"
         return retstr
 
     def __getfloatlen(s:float):
         abss=abs(s)
-        log=int(math.log10(abss)+1e-10)
+        if abss==0:#?遇到0失效,位数定位1
+            log=1
+        else:
+            log=int(math.log10(abss)+1e-10)
         if log<=0 and math.log10(abss)<0:
             log-=1
         return log
@@ -145,20 +152,36 @@ class RangeNumber:
         if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
         data=self._mainnumber/other._mainnumber
-        l=-math.sqrt((self._downerr/self._mainnumber)**2+\
-                     (other._downerr/other._mainnumber)**2)*data
-        r=math.sqrt((other._uperr/other._mainnumber)**2+\
-                    (self._uperr/self._mainnumber)**2)*data
+        #!当主值为0时出现错误
+        #!应急修复
+        if self._mainnumber==0 or other._mainnumber==0:
+            l=-abs(math.sqrt((self._downerr)**2+\
+                     (other._downerr/other._mainnumber)**2)*data)
+            r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
+                    (self._uperr)**2)*data)            
+            return RangeNumber(data,r,l)
+        l=-abs(math.sqrt((self._downerr/self._mainnumber)**2+\
+                     (other._downerr/other._mainnumber)**2)*data)
+        r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
+                    (self._uperr/self._mainnumber)**2)*data)
+        
         return RangeNumber(data,r,l)
     def __pow__(self,other):
-        if isinstance(other,float):
+        #!除以0错误
+        #todo 修正!
+        if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
         downerr1=float(other)*(float(self)**(float(other)-1))*self._downerr
         uperr1=float(other)*(float(self)**(float(other)-1))*self._uperr
-        downerr2=math.log(self)*(float(self)**float(other))*other._downerr
-        uperr2=math.log(self)*(float(self)**float(other))*other._uperr
-        downerr=-math.sqrt(downerr1**2+downerr2**2)
-        uperr=math.sqrt(uperr1**2+uperr2**2)
+        # try:
+        #     downerr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._downerr
+        #     uperr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._uperr
+        # except:
+
+        # downerr=-math.sqrt(downerr1**2+downerr2**2)
+        # uperr=math.sqrt(uperr1**2+uperr2**2)
+        downerr=-math.sqrt(downerr1**2)
+        uperr=math.sqrt(uperr1**2)
         m=float(self)**float(other)
         return RangeNumber(m,uperr,downerr)
     #以下是用于RangeNumber的math库中某些函数实现

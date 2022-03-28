@@ -1,3 +1,4 @@
+from cProfile import label
 from typing import Iterable, OrderedDict,Tuple
 
 #?from pandas import array
@@ -39,7 +40,7 @@ class DataConfig:
         if self.shortname:
             retstrlist.append("$"+self.shortname+"$")
         if self.unit:
-            retstrlist.append("($\mathbf{"+self.unit+"}$)")
+            retstrlist.append("($\mathrm{"+self.unit+"}$)")
         return "".join(retstrlist)
     def mat_format(self)->str:
         """mat_format 格式化为绘图所用格式
@@ -164,7 +165,29 @@ class DataConsumer:
         fig.set_xlabel(self._confdict[xdataname].mat_format())
         fig.set_ylabel(self._confdict[ydataname].mat_format())
         fig.set_title("$R^2=%0.4f$"%RSquared)
-        
+    def quick_draw(self,xdataname:str,ydataname_list:list,yaxis_name:str,
+                    fig:plt.subplot,*argc,**kwargs)->None:
+        """quick_draw 对于一些变量进行快速绘图
+
+        Parameters
+        ----------
+        xdataname : str
+            x轴数据
+        ydataname_list : list
+            y轴数据的列表(单位相同)
+        yaxis_name : str
+            y轴名称
+        fig : plt.subplot
+            子图
+        """        
+        xplot=np.array(self._outdict[xdataname],dtype=float)
+        for i in ydataname_list:
+            yplot=np.array(self._outdict[i],dtype=float)
+            fig.plot(xplot,yplot,
+                    label=self._confdict[i].mat_format(),*argc,**kwargs)
+        fig.set_ylabel(yaxis_name)
+        fig.set_xlabel(self._confdict[xdataname].mat_format())
+        fig.legend(loc="best")
 
 if __name__=="__main__":
     pass
