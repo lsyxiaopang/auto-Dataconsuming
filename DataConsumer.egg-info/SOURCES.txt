@@ -4,7 +4,6 @@ setup.py
 DataConsumer/DataType.py
 DataConsumer/RangeType.py
 DataConsumer/__init__.py
-DataConsumer/test.py
 DataConsumer.egg-info/PKG-INFO
 DataConsumer.egg-info/SOURCES.txt
 DataConsumer.egg-info/dependency_links.txt

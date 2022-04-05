@@ -54,7 +54,8 @@ RangeNumber重载了加,减,乘,除和乘方运算符,但需要保证RangeNumber
 
 同时,RangeNumber.log(x,base)方法对RangeNumber可以求对数,用法与math.log相同,但x为一个RangeNumber对象
 
-**注意**以上方法虽然也会对误差进行调整,但不能保证其准确性,需要加以检验!
+**注意**以上方法虽然也会对误差进行调整,并且目前可以对上下误差相同的情况做出准确的判断  
+但在上下误差不同的时候可能会出错
 
 -----------
 如果用一个RangeNumber强制转换为float,这个float中会储存RangeNumber中的主值,因此你可以将RangeNumber直接用于math库中*注意此时其行为与float一致*

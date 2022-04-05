@@ -1,3 +1,4 @@
+from turtle import down
 from typing import Tuple,List
 import math
 
@@ -44,7 +45,8 @@ class RangeNumber:
             self._downerr=-uperr
         else:
             self._downerr=downerr
-        self.show_err=False#*判断是否显示误差值
+        #!调试时打开此选项
+        self.show_err=True#*判断是否显示误差值
     @property
     def mainnum(self)->float:
         """mainnum 属性,返回值
@@ -121,67 +123,120 @@ class RangeNumber:
             allwstr="%0.{}f".format(ls-lerr+1)
             cds=s/(10**ls)
             return allwstr%cds+"\\times 10^{{ {} }}".format(ls)
-    
+#*以下部分为误差的相关运算
+#todo 对于上下误差不等时的计算仍然可能存在问题需要修正
+
+    def _get_lr(self,plist,xlist):
+        """_get_lr 通过输入偏导,获得上下误差
+
+        Parameters
+        ----------
+        plist : list
+            一个储存了偏导的列表
+        xlist : _type_
+            数据列表
+
+        Returns
+        -------
+        上下误差的元组
+            
+        """        
+        l=[0,0]
+        assert len(plist)==len(xlist)
+        for i in range(len(plist)):
+            p1=plist[i]
+            x1=xlist[i]
+            a=p1*x1._downerr
+            b=p1*x1._uperr
+            #?如果上下不对称的情况,有待修正
+            if a<0:
+                l[-1]+=a**2
+                l[0]+=b**2
+            else:
+                l[0]+=a**2    
+                l[-1]+=b**2
+        down=-math.sqrt(l[-1])
+        up=math.sqrt(l[0])
+        return up,down
+        
     def __float__(self)->float:
         '''当初始化float时,直接返回主值'''
         return self.mainnum
     def __add__(self,other):
         if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
-        l=-math.sqrt((self._downerr)**2+(other._downerr)**2)
-        r=math.sqrt((self._uperr)**2+(other._uperr)**2)
+        r,l=self._get_lr([1,1],[self,other])
+        # l=-math.sqrt((self._downerr)**2+(other._downerr)**2)
+        # r=math.sqrt((self._uperr)**2+(other._uperr)**2)
         data=self._mainnumber+other._mainnumber
         return RangeNumber(data,r,l)
     def __sub__(self,other):
         if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
-        l=-math.sqrt((self._downerr)**2+(other._downerr)**2)
-        r=math.sqrt((self._uperr)**2+(other._uperr)**2)
+        r,l=self._get_lr([1,-1],[self,other])
+        # l=-math.sqrt((self._downerr)**2+(other._downerr)**2)
+        # r=math.sqrt((self._uperr)**2+(other._uperr)**2)
         data=self._mainnumber-other._mainnumber
         return RangeNumber(data,r,l)
     def __mul__(self,other):
         if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
-        l=-math.sqrt((self._downerr*other._mainnumber)**2+\
-                     (self._mainnumber*other._downerr)**2)
-        r=math.sqrt((self._uperr*other._mainnumber)**2+\
-                    (self._mainnumber*other._uperr)**2)
+        r,l=self._get_lr([other.mainnum,self.mainnum],
+                         [self,other])#?似乎与理论不同
+        # l=-math.sqrt((self._downerr*other._mainnumber)**2+\
+        #              (self._mainnumber*other._downerr)**2)
+        # r=math.sqrt((self._uperr*other._mainnumber)**2+\
+        #             (self._mainnumber*other._uperr)**2)
         data=self._mainnumber*other._mainnumber
         return RangeNumber(data,r,l)
-    def __truediv__(self,other):
-        if not isinstance(other,RangeNumber):
-            other=RangeNumber(other)
-        data=self._mainnumber/other._mainnumber
-        #!当主值为0时出现错误
-        #!应急修复
-        if self._mainnumber==0 or other._mainnumber==0:
-            l=-abs(math.sqrt((self._downerr)**2+\
-                     (other._downerr/other._mainnumber)**2)*data)
-            r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
-                    (self._uperr)**2)*data)            
-            return RangeNumber(data,r,l)
-        l=-abs(math.sqrt((self._downerr/self._mainnumber)**2+\
-                     (other._downerr/other._mainnumber)**2)*data)
-        r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
-                    (self._uperr/self._mainnumber)**2)*data)
+    # def __truediv__(self,other):
+    #     if not isinstance(other,RangeNumber):
+    #         other=RangeNumber(other)
+    #     data=self._mainnumber/other._mainnumber
+    #     #!当主值为0时出现错误
+    #     #!应急修复
+    #     if self._mainnumber==0 or other._mainnumber==0:
+    #         l=-abs(math.sqrt((self._downerr)**2+\
+    #                  (other._downerr/other._mainnumber)**2)*data)
+    #         r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
+    #                 (self._uperr)**2)*data)            
+    #         return RangeNumber(data,r,l)
+    #     l=-abs(math.sqrt((self._downerr/self._mainnumber)**2+\
+    #                  (other._downerr/other._mainnumber)**2)*data)
+    #     r=abs(math.sqrt((other._uperr/other._mainnumber)**2+\
+    #                 (self._uperr/self._mainnumber)**2)*data)
         
-        return RangeNumber(data,r,l)
+    #     return RangeNumber(data,r,l)
+    def __truediv__(self,other):
+        
+        if not isinstance(other,RangeNumber):
+            #处理除数的情况
+            other=RangeNumber(other)
+        leftdata=self.mainnum
+        rightdata=other.mainnum
+        md=float(self)/float(other)
+        px1=1/rightdata
+        px2=-leftdata/(rightdata**2)
+        u,d=self._get_lr([px1,px2],[self,other])
+        return RangeNumber(md,u,d)
+        
     def __pow__(self,other):
-        #!除以0错误
-        #todo 修正!
         if not isinstance(other,RangeNumber):
             other=RangeNumber(other)
-        downerr1=float(other)*(float(self)**(float(other)-1))*self._downerr
-        uperr1=float(other)*(float(self)**(float(other)-1))*self._uperr
-        # try:
-        #     downerr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._downerr
-        #     uperr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._uperr
-        # except:
+        pl=(float(self)**(float(other)-1))*float(other)
+        pr=(float(self)**float(other))*math.log(float(self))
+        uperr,downerr=self._get_lr([pl,pr],[self,other])
+        # downerr1=float(other)*(float(self)**(float(other)-1))*self._downerr
+        # uperr1=float(other)*(float(self)**(float(other)-1))*self._uperr
+        # # try:
+        # #     downerr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._downerr
+        # #     uperr2=abs(math.log(abs(float(self))))*(float(self)**float(other))*other._uperr
+        # # except:
 
-        # downerr=-math.sqrt(downerr1**2+downerr2**2)
-        # uperr=math.sqrt(uperr1**2+uperr2**2)
-        downerr=-math.sqrt(downerr1**2)
-        uperr=math.sqrt(uperr1**2)
+        # # downerr=-math.sqrt(downerr1**2+downerr2**2)
+        # # uperr=math.sqrt(uperr1**2+uperr2**2)
+        # downerr=-math.sqrt(downerr1**2)
+        # uperr=math.sqrt(uperr1**2)
         m=float(self)**float(other)
         return RangeNumber(m,uperr,downerr)
     #以下是用于RangeNumber的math库中某些函数实现
@@ -201,9 +256,10 @@ class RangeNumber:
             返回求对数后带有误差的值
         """  
         p=1/(float(x)*math.log(base))
+        u,d=x._get_lr([p],[x])
         m=math.log(x,base)
-        return RangeNumber(m,x._uperr*p,x._downerr*p)
-
+        return RangeNumber(m,u,d)
+###############################################################
     
     def fromlist(floatlist:float,uperr:float=0,downerr:float=0):
         """fromlist 对于相同误差快速初始化
@@ -258,6 +314,8 @@ class RangeFromList(RangeNumber):
 
 
 if __name__=="__main__":
-    print(RangeNumber(10,0.1)**RangeNumber(2.2,0.01))
+    a=RangeNumber(0.001,0.01,-0.02)
+    b=RangeNumber(-2)
+    print(RangeNumber.log(a))
 
 
