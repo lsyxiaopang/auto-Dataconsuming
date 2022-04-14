@@ -1,4 +1,4 @@
-# auto-Dataconsuming(0.0.9)
+# auto-Dataconsuming(0.0.13)
 ## 1.介绍
 这个库分为两个部分RangeType和DataType
 ### 1.1 RangeType
@@ -41,6 +41,8 @@
 
 而在运算时,如果遇到了准确数,可以直接省去误差单参数初始化一个RangeNumber对象
 
+>(0.0.13添加)err_str设为False,则不显示误差大小,只进行修约
+
 ----------
 考虑到在使用时经常会遇到一批数据有相同的误差,所以可以使用RangeNumber.fromlist方法从浮点数列表直接获得RangeNumber的列表例如以下代码会返回一个RangeNumber列表
 
@@ -71,6 +73,7 @@ str(RangeNumber)会返回一个Latex字符串,例如以下代码
 在Latex环境下,为$(10.0)^{0.01}_{-0.2}$
 
 其自带数字修约
+>(0.0.13添加)err_str设为False,则不显示误差大小,只进行修约
 #### 3.1.2RangeFromList类
 该类为RangeNumber的子类,有所不同的是其初始化方式
 ##### 3.1.2.1初始化
@@ -113,7 +116,7 @@ tabular_format方法可以将一个数据信息形成一个表头格式的Latex�
 ##### 3.2.2.2支持操作
 该类型的字符串转换方法可以输出一个Markdown风格的表格
 
-可以对函数进行拟合与画图,见get_fitted和draw_fitted
+可以对函数进行拟合与画图,见get_fitted和draw_fitted的注释
 
 ##### 3.2.2.3实例
 该实例使用的为3.13瑞利盘测量细线扭力系数的数据

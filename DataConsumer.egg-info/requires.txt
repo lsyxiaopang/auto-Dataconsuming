@@ -3,3 +3,4 @@ typing
 [packages needed for DataType]
 pandas
 numpy
+scipy

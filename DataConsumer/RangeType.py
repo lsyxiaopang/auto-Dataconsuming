@@ -7,7 +7,7 @@ class RangeNumber:
 
         支持四则运算，并且可以转换其格式'
     """
-    def __init__(self,mainnumber:float,uperr:float=0,downerr:float=0) -> None:
+    def __init__(self,mainnumber:float,uperr:float=0,downerr:float=0,err_str=True) -> None:
         """__init__ 用最基本的方法初始化一个有不确定度的数字
 
         Parameters
@@ -18,6 +18,8 @@ class RangeNumber:
             上误差 by default 0
         downerr : float, optional
             下误差 by default 0注意,当其取默认值时为-uperr
+        err_str : True
+            是否显示误差的值
 
         Raises
         ------
@@ -46,7 +48,7 @@ class RangeNumber:
         else:
             self._downerr=downerr
         #!调试时打开此选项
-        self.show_err=True#*判断是否显示误差值
+        self.err_str=err_str#*判断是否显示误差值
     @property
     def mainnum(self)->float:
         """mainnum 属性,返回值
@@ -67,6 +69,12 @@ class RangeNumber:
             返回完整的数据，以(downerr,mainnumber,uperr)的方式组织
         """        ''''''
         return (self._downerr,self._mainnumber,self._uperr)
+    @property
+    def uperr(self)->float:
+        return self._uperr
+    @property
+    def downerr(self)->float:
+        return self._downerr
 
     @property
     def mmatype(self)->str:
@@ -106,11 +114,11 @@ class RangeNumber:
 
     def __getfloatlen(s:float):
         abss=abs(s)
-        if abss==0:#?遇到0失效,位数定位1
+        if 10>abss>=0:#?遇到0失效,位数定位1
             log=1
         else:
             log=int(math.log10(abss)+1e-10)
-        if log<=0 and math.log10(abss)<0:
+        if log<=0 and math.log10(abss)<0 :
             log-=1
         return log
     def __confloat(s:float,err:float):

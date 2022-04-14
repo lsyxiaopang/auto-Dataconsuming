@@ -7,6 +7,7 @@ import math
 import numpy as np
 import collections as c
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 class DataConfig:
     """用于储存数据信息
     """    
@@ -56,7 +57,7 @@ class DataConfig:
 class DataConsumer:
     """一个处理字符串的类型
     """    
-    def __init__(self,inpdict:dict,func,confdict:dict) -> None:
+    def __init__(self,inpdict:dict,func,confdict:dict,err_str:False) -> None:        
         """__init__ 初始化函数
 
         Parameters
@@ -67,6 +68,8 @@ class DataConsumer:
             一个数据处理用的函数
         confdict : dict
             保存数据信息的字典
+        err_str : False
+            选择是否在格式化字符串时输出误差
         """              
         self._indict=inpdict
         self._confdict=confdict
@@ -105,6 +108,17 @@ class DataConsumer:
         retstr=titlestr+setstr+"".join(mainstrlist)
         return retstr
 
+    def latexstr(self)->str:
+        tablist=[self._confdict[key].tabular_format() for key in self._outkeylist]
+        titlestr="&".join(tablist)+"\\\\\\hline\n"
+        setstr=""
+        mainstrlist=[]
+        for k in self._outarray:
+            mainstrlist.append("&".join(
+                        [str(s) for s in k])+"\\\\\\hline\n")
+        retstr=titlestr+setstr+"".join(mainstrlist)
+        return retstr
+
     def __dict2array(indict:dict):
         lis=list(indict.keys())
         ty=np.dtype([(key,list) for key in indict])
@@ -116,7 +130,7 @@ class DataConsumer:
             wl.append(tuple(l))
         array=np.array(wl,dtype=ty)
         return (lis,ty,array)
-    def get_fitted(self,xdataname:str,ydataname:str)->Tuple[np.array,float]:       
+    def get_fitted(self,xdataname:str,ydataname:str)->c.namedtuple:              
         """get_fitted 获得拟合的多项式
 
         Parameters
@@ -128,24 +142,25 @@ class DataConsumer:
 
         Returns
         -------
-        np.array
-            拟合后的多项式
-        float
-            RSquared
+        c.namedtuple
+            同stats.linregress的返回
         """        
         xdata=np.array(self._outdict[xdataname],dtype=float)
         ydata=np.array(self._outdict[ydataname],dtype=float)
-        poly=np.polyfit(xdata,ydata,1)
-        #*求SSR
-        pydata=np.polyval(poly,xdata)
-        SSR=np.sum((ydata-pydata)**2)
-        #*求SST
-        avey=np.mean(ydata)
-        SST=np.sum((ydata-avey)**2)
-        RS=1-SSR/SST
-        return poly,RS
+        #!该方法被弃用
+        # poly=np.polyfit(xdata,ydata,1)
+        # #*求SSR
+        # pydata=np.polyval(poly,xdata)
+        # SSR=np.sum((ydata-pydata)**2)
+        # #*求SST
+        # avey=np.mean(ydata)
+        # SST=np.sum((ydata-avey)**2)
+        # RS=1-SSR/SST
+        # #*求不确定度
+
+        return stats.linregress(xdata,ydata) 
     def draw_fitted(self,xdataname:str,ydataname:str
-                    ,fig:plt.subplot,**kwargs)->None:
+                    ,fig:plt.subplot,**kwargs)->Tuple[c.namedtuple,tuple]:
         """draw_fitted 绘制拟合后的图像
 
         Parameters
@@ -156,8 +171,24 @@ class DataConsumer:
             y数据简称
         fig : plt.subplot
             用于绘图的子图
-        """        
-        poly,RSquared=self.get_fitted(xdataname,ydataname)
+        Returns
+        -------
+        c.namedtuple
+            同stats.linregress的返回
+            slope:斜率
+            intercept:截距
+            rvalue:R(使用时需要平方)
+            pvalue:P(一般要大于0.05有效)
+            stderr:斜率误差
+            intercept_stderr:截距误差
+        tuple
+            类似poly,但是里面的是RangeNumber
+        """              
+        fdata=self.get_fitted(xdataname,ydataname)
+        rettuple=(RangeNumber(fdata.slope,fdata.stderr),
+                  RangeNumber(fdata.intercept,fdata.intercept_stderr))
+        RSquared=(fdata.rvalue)**2
+        poly=(fdata.slope,fdata.intercept)
         xplot=np.linspace(min(self._outdict[xdataname])
                         ,max(self._outdict[xdataname]),20)
         yplot=np.polyval(poly,xplot)
@@ -165,6 +196,7 @@ class DataConsumer:
         fig.set_xlabel(self._confdict[xdataname].mat_format())
         fig.set_ylabel(self._confdict[ydataname].mat_format())
         fig.set_title("$R^2=%0.4f$"%RSquared)
+        return fdata,rettuple
     def quick_draw(self,xdataname:str,ydataname_list:list,yaxis_name:str,
                     fig:plt.subplot,*argc,**kwargs)->None:
         """quick_draw 对于一些变量进行快速绘图
