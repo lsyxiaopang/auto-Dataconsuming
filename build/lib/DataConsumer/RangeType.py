@@ -104,7 +104,7 @@ class RangeNumber:
         #todo 现有的数据修约可能存在问题,需要修改
         errnumu="%.1g"%self._uperr
         errnumd="%.1g"%self._downerr
-        if self.show_err:#*显示是否展示误差大小
+        if self.err_str:#*显示是否展示误差大小
             retstr="$("+\
                     RangeNumber.__confloat(self._mainnumber,max(-self._downerr,self._uperr))\
                     +")"+"^{"+str(errnumu)+"}_{"+str(errnumd)+"}$"
@@ -114,10 +114,9 @@ class RangeNumber:
 
     def __getfloatlen(s:float):
         abss=abs(s)
-        if 10>abss>=0:#?遇到0失效,位数定位1
-            log=1
-        else:
-            log=int(math.log10(abss)+1e-10)
+        # if 10>abss>=0:#?遇到0失效,位数定位1
+        #     log=1
+        log=int(math.log10(abss)+1e-10)
         if log<=0 and math.log10(abss)<0 :
             log-=1
         return log

@@ -3,6 +3,7 @@ from typing import Iterable, OrderedDict,Tuple
 
 #?from pandas import array
 from DataConsumer.RangeType import *
+#!from RangeType import *
 import math
 import numpy as np
 import collections as c
@@ -70,7 +71,8 @@ class DataConsumer:
             保存数据信息的字典
         err_str : False
             选择是否在格式化字符串时输出误差
-        """              
+        """
+        self.err_str=err_str             
         self._indict=inpdict
         self._confdict=confdict
         (self._inkeylist,self._inty,self._inarray)=\
@@ -89,7 +91,13 @@ class DataConsumer:
         (self._outkeylist,self._outty,self._outarray)=\
             DataConsumer.__dict2array(self._outdict)
         
-    
+    def _noerrstr(strfunc,y,k):
+        te=k.err_str
+        k.err_str=y
+        retstr=strfunc(k)
+        k.err_str=te
+        return retstr
+
     def __str__(self) -> str:
         """__str__ 返回md格式表格
 
@@ -97,7 +105,13 @@ class DataConsumer:
         -------
         str
             一个包含md格式表格的字符串
-        """               
+        """    
+        #?AOP对于是否显示误差
+        strfunc=RangeNumber.__str__
+        RangeNumber.__str__=lambda k:\
+                            DataConsumer._noerrstr(strfunc,
+                                                self.err_str,k)
+        ##            
         tablist=[self._confdict[key].tabular_format() for key in self._outkeylist]
         titlestr="|"+"|".join(tablist)+"|\n"
         setstr="|----"*len(self._outkeylist)+"|\n"
@@ -106,9 +120,18 @@ class DataConsumer:
             mainstrlist.append("|"+"|".join(
                         [str(s) for s in k])+"|\n")
         retstr=titlestr+setstr+"".join(mainstrlist)
+        #?AOP恢复
+        RangeNumber.__str__=strfunc
+        ##
         return retstr
 
     def latexstr(self)->str:
+        #?AOP对于是否显示误差
+        strfunc=RangeNumber.__str__
+        RangeNumber.__str__=lambda k:\
+                            DataConsumer._noerrstr(strfunc,
+                                                self.err_str,k)
+        ##    
         tablist=[self._confdict[key].tabular_format() for key in self._outkeylist]
         titlestr="&".join(tablist)+"\\\\\\hline\n"
         setstr=""
@@ -117,6 +140,9 @@ class DataConsumer:
             mainstrlist.append("&".join(
                         [str(s) for s in k])+"\\\\\\hline\n")
         retstr=titlestr+setstr+"".join(mainstrlist)
+        #?AOP恢复
+        RangeNumber.__str__=strfunc
+        ##
         return retstr
 
     def __dict2array(indict:dict):

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: DataConsumer
-Version: 0.0.13
+Version: 0.0.14
 Summary: 实现对数据的快速处理以及对带有不确定度的数据的运算和修约
 Home-page: https://github.com/lsyxiaopang/auto-Dataconsuming
 Author: Lisongyu
@@ -133,9 +133,11 @@ tabular_format方法可以将一个数据信息形成一个表头格式的Latex�
 一个用于处理数据的函数(参数名称为输入数据简称,对一条数据进行处理,返回一个包含以输出数据为值,输出数据简称为键的字典**如果希望将输入数据保留,则需要将输入数据的字典整合于其中**)
 
 一个包括输入输出数据信息的字典(键为输入输出数据简称,值为输入输出数据的信息的DataConfig类实例)
+>(0.0.13添加)err_str设为False,则不显示误差大小,只进行修约
 
 ##### 3.2.2.2支持操作
 该类型的字符串转换方法可以输出一个Markdown风格的表格
+使用latexstr可以输出一个Latex风格表格
 
 可以对函数进行拟合与画图,见get_fitted和draw_fitted的注释
 
